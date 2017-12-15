@@ -16,7 +16,6 @@ var wss = new WebSocketServer({
 var express = require('express');
 var app = express();
 var port = 9001;
-
 app.use(function (req, res) {
 	res.send({
 		msg: "hello"
@@ -27,23 +26,33 @@ wss.on('connection', function connection(ws, req) {
 	const location = url.parse(req.url, true)
 	// you might use location.query.access_token to authenticate or share sessions
 	// or ws.upgradeReq.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
-	ws.send(JSON.stringify(ws))
+	// ws.send(JSON.stringify(ws))
 	ws.on('message', function incoming(msg) {
 		console.log('received: %s', msg)
 		// ws.send(msg)
-		// this.wss.broadcast(msg, roomid)
+		this.wss.broadcast(msg, roomId)
 	})
 
 	// 识别成功，把user绑定到该WebSocket对象:
     // ws.user = user;
     // 绑定WebSocketServer对象:
-    ws.wss = wss
+	ws.wss = wss
+	ws.roomId = 
 });
 // 广播方法
-wss.broadcast = function (msg) {
+wss.broadcast = function (msg, roomId) {
+	let str = ''
     wss.clients.forEach(client => {
-		console.log(client)
-        client.send(msg)
+		// for (const key in client) {
+		// 	if (client.hasOwnProperty(key)) {
+		// 		// const val = client[key]
+		// 		console.log(key)
+		// 	}
+		// }
+		if (client.roomId === roomId) {
+			client.send(msg)
+			console.log(`room: ${roomId}广播消息 ${msg}`)
+		}
     });
 };
 

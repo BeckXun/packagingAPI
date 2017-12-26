@@ -18,12 +18,12 @@ const opt = {
     Chat: {
       interface: 'com.che360.chat.service.chatService',
       methodSignature: {
-        getNewMsg : (type) => (java) => [ java.int(type) ], // 获取消息
+        getNewMsg : (type) => (java) => [ java.int(type), java.String(roomId) ], // 获取消息
         addMessage: (uid, msg, ip, roomId, groupId, toUid) => (java) => [// 发送消息
           java.int(uid),
           java.String(msg),
           java.String(ip),
-          java.int(roomId),
+          java.String(roomId),
           java.int(groupId),
           java.int(toUid)
         ],

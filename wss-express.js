@@ -22,12 +22,12 @@ app.use(function (req, res) {
 	});
 });
 // 上传聊天记录
-wss.uploadMsg = function (msg) {
+wss.uploadMsg = function (msg, roomId) {
 	const { uid, roomId, ip } = this
     let groupId = 0,
     	toUid = 0;
     global.Dubbo.Chat
-      .addMessage(uid, msg, ip, parseInt(roomId), groupId, toUid)
+      .addMessage(uid, msg, ip, roomId, groupId, toUid)
       .then(data => {
 		// res.json(returnFmt.normal(JSON.parse(data)))
 		console.log(`uid:${uid}的消息上传成功`)
@@ -38,15 +38,15 @@ wss.uploadMsg = function (msg) {
       });
 }
 // 获取房间历史记录
-wss.getHistory = function (ws, type) {
+wss.getHistory = function (ws, type, roomId) {
 	global.Dubbo.Chat
-		.getNewMsg(parseInt(type))
+		.getNewMsg(parseInt(type), roomId)
 		.then(data => {
 			data = JSON.parse(data)
 			// 数据的过滤与组合
 			data.data.forEach(x => {
 				if (x.uptime && typeof x.uptime === 'string') {
-				x.uptime = moment(new Date(x.uptime)).format('YYYY-MM-DD HH:mm:ss')
+					x.uptime = moment(new Date(x.uptime)).format('YYYY-MM-DD HH:mm:ss')
 				}
 			})
 			// 返回所需数据
@@ -71,7 +71,7 @@ wss.on('connection', function connection(ws, req) {
 	ws.wss = wss
 
 	// 获取历史记录
-	ws.wss.getHistory(ws, 1)
+	ws.wss.getHistory(ws, 1, roomId)
 
 	// 监听聊天
 	ws.on('message', function incoming(msg) {
